@@ -1,16 +1,10 @@
-import { PrismaClient, TodoStatus } from "@prisma/client";
-
-const prisma = new PrismaClient()
+import prisma from "../config/prisma.js";
 
 export const getAllTodos = async (request, response) => {
 
     try {
-
         const todos = await prisma.todo.findMany()
-
-        response.status(200).json({
-            todos
-        })
+        response.status(200).json(todos)
         
     } catch (error) {
             console.log(error)
@@ -18,6 +12,30 @@ export const getAllTodos = async (request, response) => {
                 message: "Bad luck. Try again."
         })
     }
+}
+
+export const getTodo = async (request, response) => {
+
+    try {
+
+const { id } = request.params
+
+const todo = await prisma.todo.findUnique({
+    where: {
+        id: Number(id)
+    }
+})
+
+response.status(200).json(todo)
+        response.status(200).json(todo)
+
+    } catch (error) {
+            console.log(error)
+            response.status(500).json({
+                message: "Bad luck. Try again."
+        })
+    }
+    
 }
 
 export const createTodo = async (request, response) => {
@@ -47,5 +65,58 @@ export const createTodo = async (request, response) => {
             message: "Bad luck. Try again."
         })
     }
+}
 
+export const updateTodo = async (request, response) => {
+
+    try {
+
+        const { id } = request.params
+        const { title, description, status } = request.body
+
+        const updateTodo = await prisma.todo.update({
+            where: {
+                id: Number(id)
+            },
+            data: {
+                title,
+                description
+            }
+        })
+
+        response.status(200).json({
+            message: "Todo updated successfully.",
+            updateTodo
+        })
+
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({
+            message: "Bad luck. Try again."
+        })
+    }
+}
+
+export const deleteTodo = async (request, response) => {
+
+    try {
+
+        const { id } = request.params
+
+        await prisma.todo.delete({
+            where: {
+                id: Number(id)
+            }
+        })
+
+        response.status(200).json({
+            message: "Todo deleted successfully."
+        })
+
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({
+            message: "Bad luck. Try again."
+        })
+    }
 }
